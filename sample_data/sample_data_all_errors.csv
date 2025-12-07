@@ -1,0 +1,5 @@
+user_id,user_name,order_count,join_year
+1001,Alice,,2022
+1001,Bob,12,2021
+1003,Charlie,,2025
+1004,David,3,2026

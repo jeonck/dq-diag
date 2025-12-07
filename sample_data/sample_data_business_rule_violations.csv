@@ -1,0 +1,11 @@
+user_id,user_name,order_count,join_year,age
+1001,Alice,5,2022,25
+1002,Bob,12,2021,30
+1003,Charlie,-3,2023,28  # Business rule violation: negative order count
+1004,David,3,2024,22
+1005,Eve,15,2020,35
+1006,Frank,6,2019,-5    # Business rule violation: negative age
+1007,Grace,8,2025,40    # Business rule violation: future join year
+1008,Henry,0,1995,65
+1009,Ivy,-1,2001,27     # Business rule violation: negative order count
+1010,Jack,20,-3,33      # Business rule violation: negative join year
