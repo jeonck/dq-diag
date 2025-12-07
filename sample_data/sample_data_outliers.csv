@@ -1,0 +1,11 @@
+user_id,user_name,order_count,join_year,salary
+1001,Alice,5,2022,50000
+1002,Bob,12,2021,54000
+1003,Charlie,8,2023,52000
+1004,David,3,2024,51000
+1005,Eve,15,2020,53000
+1006,Frank,6,2019,200000  # outlier salary
+1007,Grace,25,2022,48000   # outlier order count
+1008,Henry,4,2025,55000    # future year
+1009,Ivy,2,2001,45000      # very old year
+1010,Jack,22,2023,40000    # outlier order count
