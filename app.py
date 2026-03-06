@@ -425,23 +425,34 @@ if uploaded_file is not None or st.session_state.get('use_sample', False):
         # 리포트 다운로드
         st.markdown("---")
 
-        if st.button("📥 진단 리포트 다운로드 (JSON)"):
-            import json
+        if st.button("📥 진단 리포트 다운로드 (CSV)"):
+            import io
 
-            report = {
-                'timestamp': datetime.now().isoformat(),
-                'overall_score': overall_score,
-                'grade': grade,
-                'results': results
-            }
+            # CSV 형식으로 변환
+            csv_buffer = io.StringIO()
+            csv_buffer.write("지표,점수,이슈수,메트릭\n")
 
-            json_str = json.dumps(report, ensure_ascii=False, indent=2)
+            for key, result in results.items():
+                indicator_name = result.get('name', key)
+                score = result.get('score', 0)
+                issue_count = len(result.get('issues', []))
+                
+                # 메트릭 문자열로 변환
+                metrics_str = ""
+                if 'metrics' in result:
+                    metrics_list = [f"{k}: {v}" for k, v in result['metrics'].items()]
+                    metrics_str = "; ".join(metrics_list)
+                
+                # CSV 라인 작성
+                csv_buffer.write(f'"{indicator_name}",{score},{issue_count},"{metrics_str}"\n')
+
+            csv_data = csv_buffer.getvalue()
 
             st.download_button(
-                label="다운로드",
-                data=json_str,
-                file_name=f"dq_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
-                mime="application/json"
+                label="CSV 다운로드",
+                data=csv_data,
+                file_name=f"dq_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                mime="text/csv"
             )
 
 else:
