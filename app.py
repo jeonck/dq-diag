@@ -329,28 +329,67 @@ if uploaded_file is not None or st.session_state.get('use_sample', False):
         st.markdown("---")
         st.markdown("### 📋 상세 진단 결과")
 
-        for key, result in results.items():
-            with st.expander(f"**{result.get('name', key)}** - {result.get('score', 0):.1f}점", expanded=True):
+        # 지표별 색상 매핑
+        indicator_colors = {
+            'completeness': '🔵',
+            'validity': '🟣',
+            'consistency': '🟠',
+            'accuracy': '🟢',
+            'security': '🔴',
+            'usability': '🟡',
+            'accessibility': '🔷',
+            'timeliness': '⏰',
+            'diversity': '🌈',
+            'uniqueness': '💎'
+        }
 
-                # 이슈 요약
+        for key, result in results.items():
+            indicator_icon = indicator_colors.get(key, '📊')
+            indicator_name = result.get('name', key)
+            score = result.get('score', 0)
+            
+            # 점수에 따른 색상 표시
+            if score >= 90:
+                score_color = "green"
+                score_icon = "✅"
+            elif score >= 70:
+                score_color = "orange"
+                score_icon = "⚠️"
+            elif score >= 50:
+                score_color = "yellow"
+                score_icon = "⚡"
+            else:
+                score_color = "red"
+                score_icon = "❌"
+            
+            # 지표별 구분 카드
+            st.markdown(f"### {indicator_icon} {indicator_name}")
+            
+            with st.container():
+                # 점수 및 메트릭 표시
+                metric_cols = st.columns([2, 1, 1, 1])
+                with metric_cols[0]:
+                    st.metric("품질 점수", f"{score:.1f}점")
+                with metric_cols[1]:
+                    st.metric("상태", f"{score_icon}")
+                with metric_cols[2]:
+                    if 'issues' in result:
+                        st.metric("이슈 수", len(result['issues']))
+                    else:
+                        st.metric("이슈 수", 0)
+                with metric_cols[3]:
+                    if 'metrics' in result:
+                        first_metric = list(result['metrics'].items())[0]
+                        st.metric(first_metric[0], first_metric[1])
+                
+                st.markdown("---")
+                
+                # 이슈 상세 표시
                 if 'issues' in result and result['issues']:
                     # 심각도별로 이슈 그룹화
                     high_issues = [i for i in result['issues'] if '🔴' in i.get('severity', '')]
                     medium_issues = [i for i in result['issues'] if '🟡' in i.get('severity', '')]
                     low_issues = [i for i in result['issues'] if '🟢' in i.get('severity', '')]
-
-                    # 요약 표시
-                    col1, col2, col3, col4 = st.columns(4)
-                    with col1:
-                        st.metric("전체 이슈", len(result['issues']))
-                    with col2:
-                        st.metric("🔴 높음", len(high_issues))
-                    with col3:
-                        st.metric("🟡 중간", len(medium_issues))
-                    with col4:
-                        st.metric("🟢 낮음", len(low_issues))
-
-                    st.markdown("---")
 
                     for i, issue in enumerate(result['issues'], 1):
                         # 심각도에 따른 색상 구분
@@ -371,15 +410,17 @@ if uploaded_file is not None or st.session_state.get('use_sample', False):
                         st.markdown("---")
                 else:
                     st.success("✅ 이슈가 발견되지 않았습니다.")
-
+                
                 # 상세 메트릭
                 if 'metrics' in result:
                     st.markdown("**📊 상세 메트릭**")
                     metric_cols = st.columns(len(result['metrics']))
-
                     for i, (metric_name, metric_value) in enumerate(result['metrics'].items()):
                         with metric_cols[i]:
                             st.metric(metric_name, metric_value)
+            
+            # 구분선
+            st.markdown("---")
 
         # 리포트 다운로드
         st.markdown("---")
