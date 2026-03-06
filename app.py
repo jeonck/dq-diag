@@ -60,7 +60,7 @@ with st.sidebar:
     check_accessibility = st.checkbox("접근성 (Accessibility)", value=False)
     check_timeliness = st.checkbox("적시성 (Timeliness)", value=False)
     check_diversity = st.checkbox("다양성 (Diversity)", value=False)
-    check_uniqueness = st.checkbox("유일성 (Uniqueness)", value=False)
+    check_uniqueness = st.checkbox("유일성 (Uniqueness)", value=True)
 
     st.markdown("---")
 
