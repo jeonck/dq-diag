@@ -79,6 +79,9 @@ if uploaded_file is not None or st.session_state.get('use_sample', False):
         df = pd.read_csv('sample_data/sample_customer.csv')
         st.info("📂 샘플 데이터를 사용합니다.")
 
+    # 데이터를 session state 에 저장
+    st.session_state['df'] = df
+
     # 데이터 미리보기
     with st.expander("🔍 데이터 미리보기", expanded=False):
         st.dataframe(df.head(10), use_container_width=True)
@@ -466,8 +469,11 @@ if uploaded_file is not None or st.session_state.get('use_sample', False):
             if st.button("📁 원본 데이터 (CSV)", use_container_width=True):
                 import io
 
+                # session state 에서 전체 데이터 가져오기
+                full_df = st.session_state.get('df', df)
+
                 csv_buffer = io.StringIO()
-                df.to_csv(csv_buffer, index=False, encoding='utf-8-sig')
+                full_df.to_csv(csv_buffer, index=False, encoding='utf-8-sig')
                 csv_data = csv_buffer.getvalue()
 
                 st.download_button(
