@@ -84,7 +84,10 @@ if uploaded_file is not None or st.session_state.get('use_sample', False):
 
     # 데이터 미리보기
     with st.expander("🔍 데이터 미리보기", expanded=False):
-        st.dataframe(df, use_container_width=True, height=400, hide_index=True)
+        # 인덱스를 1 부터 시작하도록 변경
+        df_display = df.copy()
+        df_display.index = df_display.index + 1
+        st.dataframe(df_display, use_container_width=True, height=400)
 
         col1, col2, col3, col4 = st.columns(4)
         with col1:
