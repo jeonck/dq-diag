@@ -424,35 +424,92 @@ if uploaded_file is not None or st.session_state.get('use_sample', False):
 
         # 리포트 다운로드
         st.markdown("---")
+        st.markdown("### 📥 리포트 다운로드")
 
-        if st.button("📥 진단 리포트 다운로드 (CSV)"):
+        download_col1, download_col2 = st.columns(2)
+
+        with download_col1:
+            # 진단 결과 요약 CSV 다운로드
+            if st.button("📊 진단 결과 요약 (CSV)", use_container_width=True):
+                import io
+
+                # CSV 형식으로 변환
+                csv_buffer = io.StringIO()
+                csv_buffer.write("지표,점수,이슈수,메트릭\n")
+
+                for key, result in results.items():
+                    indicator_name = result.get('name', key)
+                    score = result.get('score', 0)
+                    issue_count = len(result.get('issues', []))
+
+                    # 메트릭 문자열로 변환
+                    metrics_str = ""
+                    if 'metrics' in result:
+                        metrics_list = [f"{k}: {v}" for k, v in result['metrics'].items()]
+                        metrics_str = "; ".join(metrics_list)
+
+                    # CSV 라인 작성
+                    csv_buffer.write(f'"{indicator_name}",{score},{issue_count},"{metrics_str}"\n')
+
+                csv_data = csv_buffer.getvalue()
+
+                st.download_button(
+                    label="CSV 다운로드",
+                    data=csv_data,
+                    file_name=f"dq_summary_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                    mime="text/csv",
+                    use_container_width=True
+                )
+
+        with download_col2:
+            # 원본 데이터 다운로드
+            if st.button("📁 원본 데이터 (CSV)", use_container_width=True):
+                import io
+
+                csv_buffer = io.StringIO()
+                df.to_csv(csv_buffer, index=False, encoding='utf-8-sig')
+                csv_data = csv_buffer.getvalue()
+
+                st.download_button(
+                    label="CSV 다운로드",
+                    data=csv_data,
+                    file_name=f"original_data_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                    mime="text/csv",
+                    use_container_width=True
+                )
+
+        # 상세 이슈 리포트 다운로드
+        if st.button("📋 상세 이슈 리포트 (CSV)", use_container_width=True):
             import io
 
-            # CSV 형식으로 변환
             csv_buffer = io.StringIO()
-            csv_buffer.write("지표,점수,이슈수,메트릭\n")
+            csv_buffer.write("지표,심각도,이슈제목,설명,상세정보\n")
 
             for key, result in results.items():
                 indicator_name = result.get('name', key)
-                score = result.get('score', 0)
-                issue_count = len(result.get('issues', []))
-                
-                # 메트릭 문자열로 변환
-                metrics_str = ""
-                if 'metrics' in result:
-                    metrics_list = [f"{k}: {v}" for k, v in result['metrics'].items()]
-                    metrics_str = "; ".join(metrics_list)
-                
-                # CSV 라인 작성
-                csv_buffer.write(f'"{indicator_name}",{score},{issue_count},"{metrics_str}"\n')
+
+                if 'issues' in result and result['issues']:
+                    for issue in result['issues']:
+                        title = issue.get('title', '').replace('"', '""')
+                        severity = issue.get('severity', '')
+                        description = issue.get('description', '').replace('"', '""')
+
+                        # 상세정보 JSON 문자열로
+                        details_str = ""
+                        if 'details' in issue:
+                            import json
+                            details_str = json.dumps(issue['details'], ensure_ascii=False).replace('"', '""')
+
+                        csv_buffer.write(f'"{indicator_name}","{severity}","{title}","{description}","{details_str}"\n')
 
             csv_data = csv_buffer.getvalue()
 
             st.download_button(
-                label="CSV 다운로드",
+                label="상세 이슈 리포트 다운로드",
                 data=csv_data,
-                file_name=f"dq_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-                mime="text/csv"
+                file_name=f"dq_issues_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                mime="text/csv",
+                use_container_width=True
             )
 
 else:
