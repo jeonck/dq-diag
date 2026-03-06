@@ -10,6 +10,10 @@ from modules.accuracy import AccuracyChecker
 from modules.security import SecurityChecker
 from modules.timeliness import TimelinessChecker
 from modules.usability import UsabilityChecker
+from modules.validity import ValidityChecker
+from modules.accessibility import AccessibilityChecker
+from modules.diversity import DiversityChecker
+from modules.uniqueness import UniquenessChecker
 from theoretical_framework import show_theoretical_framework
 
 # 페이지 설정
@@ -48,11 +52,15 @@ with st.sidebar:
     st.header("📋 진단 지표 선택")
 
     check_completeness = st.checkbox("완전성 (Completeness)", value=True)
+    check_validity = st.checkbox("유효성 (Validity)", value=True)
     check_consistency = st.checkbox("일관성 (Consistency)", value=True)
     check_accuracy = st.checkbox("정확성 (Accuracy)", value=True)
     check_security = st.checkbox("보안성 (Security)", value=False)
-    check_timeliness = st.checkbox("적시성 (Timeliness)", value=False)
     check_usability = st.checkbox("유용성 (Usability)", value=False)
+    check_accessibility = st.checkbox("접근성 (Accessibility)", value=False)
+    check_timeliness = st.checkbox("적시성 (Timeliness)", value=False)
+    check_diversity = st.checkbox("다양성 (Diversity)", value=False)
+    check_uniqueness = st.checkbox("유일성 (Uniqueness)", value=False)
 
     st.markdown("---")
 
@@ -99,11 +107,15 @@ if uploaded_file is not None or st.session_state.get('use_sample', False):
 
         total_checks = sum([
             check_completeness,
+            check_validity,
             check_consistency,
             check_accuracy,
             check_security,
+            check_usability,
+            check_accessibility,
             check_timeliness,
-            check_usability
+            check_diversity,
+            check_uniqueness
         ])
 
         current_check = 0
@@ -113,6 +125,14 @@ if uploaded_file is not None or st.session_state.get('use_sample', False):
             status_text.text("완전성 진단 중...")
             checker = CompletenessChecker(df)
             results['completeness'] = checker.check()
+            current_check += 1
+            progress_bar.progress(current_check / total_checks)
+
+        # 유효성 진단
+        if check_validity:
+            status_text.text("유효성 진단 중...")
+            checker = ValidityChecker(df)
+            results['validity'] = checker.check()
             current_check += 1
             progress_bar.progress(current_check / total_checks)
 
@@ -140,6 +160,22 @@ if uploaded_file is not None or st.session_state.get('use_sample', False):
             current_check += 1
             progress_bar.progress(current_check / total_checks)
 
+        # 유용성 진단
+        if check_usability:
+            status_text.text("유용성 진단 중...")
+            checker = UsabilityChecker(df)
+            results['usability'] = checker.check()
+            current_check += 1
+            progress_bar.progress(current_check / total_checks)
+
+        # 접근성 진단
+        if check_accessibility:
+            status_text.text("접근성 진단 중...")
+            checker = AccessibilityChecker(df)
+            results['accessibility'] = checker.check()
+            current_check += 1
+            progress_bar.progress(current_check / total_checks)
+
         # 적시성 진단
         if check_timeliness:
             status_text.text("적시성 진단 중...")
@@ -148,11 +184,19 @@ if uploaded_file is not None or st.session_state.get('use_sample', False):
             current_check += 1
             progress_bar.progress(current_check / total_checks)
 
-        # 유용성 진단
-        if check_usability:
-            status_text.text("유용성 진단 중...")
-            checker = UsabilityChecker(df)
-            results['usability'] = checker.check()
+        # 다양성 진단
+        if check_diversity:
+            status_text.text("다양성 진단 중...")
+            checker = DiversityChecker(df)
+            results['diversity'] = checker.check()
+            current_check += 1
+            progress_bar.progress(current_check / total_checks)
+
+        # 유일성 진단
+        if check_uniqueness:
+            status_text.text("유일성 진단 중...")
+            checker = UniquenessChecker(df)
+            results['uniqueness'] = checker.check()
             current_check += 1
             progress_bar.progress(current_check / total_checks)
 
@@ -375,36 +419,59 @@ else:
         - 물리구조 일치성
         - 속성의미 명확성
 
-        ### 2️⃣ 일관성 (Consistency)
+        ### 2️⃣ 유효성 (Validity)
+        - 데이터 형식 준수
+        - 도메인 값 유효성
+        - 참조 무결성
+        - 논리적 관계 규칙
+
+        ### 3️⃣ 일관성 (Consistency)
         - 속성명 일관성
         - 표준 준수 여부
         - 중복값 존재 여부
         - 연계값 정합성
 
-        ### 3️⃣ 정확성 (Accuracy)
+        ### 4️⃣ 정확성 (Accuracy)
         - 입력값 유효성
         - 업무규칙 준수
         - 범위/형식 정확성
         - 참조관계 무결성
         - 계산식 정확성
+
+        ### 5️⃣ 보안성 (Security)
+        - 데이터 오너십
+        - 접근 제한
+        - DB 보호 정책
         """)
 
     with col2:
         st.markdown("""
-        ### 4️⃣ 보안성 (Security)
-        - 데이터 오너십
-        - 접근 제한
-        - DB 보호 정책
-
-        ### 5️⃣ 적시성 (Timeliness)
-        - 응답 시간
-        - 데이터 제공 시간
-        - 최신값 반영
-
         ### 6️⃣ 유용성 (Usability)
         - 충분한 데이터량
         - 접근 편의성
         - 활용도
+
+        ### 7️⃣ 접근성 (Accessibility)
+        - 데이터 접근 용이성
+        - 검색 기능 제공
+        - API/다운로드 지원
+        - 문서화 completeness
+
+        ### 8️⃣ 적시성 (Timeliness)
+        - 응답 시간
+        - 데이터 제공 시간
+        - 최신값 반영
+
+        ### 9️⃣ 다양성 (Diversity)
+        - 데이터 분포 균형성
+        - 카테고리 다양성
+        - 샘플 대표성
+        - 편향 지표
+
+        ### 🔟 유일성 (Uniqueness)
+        - 중복 레코드 수
+        - 고유값 비율
+        - 중복 발생 빈도
         """)
 
     st.markdown("---")
